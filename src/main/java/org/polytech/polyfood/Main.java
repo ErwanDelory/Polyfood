@@ -64,6 +64,9 @@ public class Main {
         Order order = new Order(consumerId, restaurantId, orderLineItems, deliveryInformation, paymentInformation);
         orderService.createOrder(order);
 
-
+        /*List<Order> orders = orderService.fetchConsumerOrders(consumerId);
+        for (Order o : orders) {
+            System.out.println(o.toString());
+        }*/
     }
 }

@@ -1,6 +1,7 @@
 package org.polytech.polyfood.business;
 
 import org.polytech.polyfood.persistence.JdbcOrderRepository;
+import java.util.List;
 
 public class OrderService {
     private JdbcOrderRepository jdbcOrderRepository = new JdbcOrderRepository();
@@ -14,4 +15,9 @@ public class OrderService {
         this.jdbcOrderRepository.save(order);
         // send notification to user
     }
+
+    public List<Order> fetchConsumerOrders(Long consumerId){
+        return this.jdbcOrderRepository.findByConsumerId(consumerId);
+    }
+
 }
