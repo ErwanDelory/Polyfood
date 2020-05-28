@@ -1,71 +1,23 @@
 package org.polytech.polyfood;
 
-import org.hibernate.Session;
-import org.hibernate.SessionFactory;
-import org.hibernate.Transaction;
-import org.hibernate.boot.registry.StandardServiceRegistryBuilder;
-import org.hibernate.cfg.Configuration;
-import org.hibernate.cfg.Environment;
-import org.hibernate.service.ServiceRegistry;
 import org.polytech.polyfood.business.*;
-import org.polytech.polyfood.persistence.JpaOrderRepository;
-import org.polytech.polyfood.persistence.OrderRepository;
+import org.springframework.boot.SpringApplication;
+import org.springframework.context.ApplicationContext;
 
 import java.math.BigDecimal;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Properties;
 
 public class Main {
 
 
     public static void main(String[] args) {
-        System.out.println("Hello");
-        /*String url="jdbc:mysql://localhost:3308/polyfood?zeroDateTimeBehavior=CONVERT_TO_NULL&serverTimezone=UTC";
-        String user="root"; // Login de la base de données
-        String password=""; // Mot de passe de la base de données
-
-        //Autre méthode de connexion sur une base de données en ligne
-        //String url="jdbc:mysql://database-1.cbfckhgdcm22.eu-west-3.rds.amazonaws.com/USERNAMEDATABASE";
-        //String user="root";
-        //String password="polytech";
-
-        try {
-            Class.forName("com.mysql.cj.jdbc.Driver");
-            Connection connection = DriverManager.getConnection(url, user, password);
-            //String sql="INSERT INTO USERS VALUES ('erwan','erwan')";
-            String sql = "SELECT * FROM USERS";
-            //Création de la connexion
-            // execute --> update, delete, insert
-            // executeQuery --> select
-            connection.createStatement().executeQuery(sql);
-
-            ResultSet resultSet = connection.createStatement().executeQuery(sql);
-            while(resultSet.next()) {
-                System.out.println("username:" + resultSet.getString("username") + " password:" + resultSet.getString("password"));
-            }
-
-            //Fermeture de la connexion
-            connection.close();
-        } catch (ClassNotFoundException e) {
-            e.printStackTrace();
-        } catch (SQLException throwables) {
-            throwables.printStackTrace();
-        }; */
-
-        SessionFactory sessionFactory = buildSessionFactory();
 
 
-        Session session = sessionFactory.openSession();
-        Transaction transaction = session.beginTransaction();
+        ApplicationContext context = SpringApplication.run(AppConfiguration.class);
 
-        OrderRepository orderRepository = new JpaOrderRepository(session);
 
-        OrderService orderService = new OrderService(orderRepository);
+        OrderService orderService = context.getBean(OrderService.class);
 
         Long consumerId = 982738L;
         Long restaurantId = 62937L;
@@ -74,14 +26,12 @@ public class Main {
         OrderLineItem item3 = new OrderLineItem(9L, "Evian", BigDecimal.valueOf(2.5));
         List<OrderLineItem> orderLineItems = Arrays.asList(item1, item2, item3);
 
-        DeliveryInformation deliveryInformation = new DeliveryInformation("33 Rue la Fayette","75009","DC 6382");
+        DeliveryInformation deliveryInformation = new DeliveryInformation("33 Rue la Fayette", "75009", "DC 6382");
 
-        PaymentInformation paymentInformation = new PaymentInformation("826786839822809","02/2022","762");
+        PaymentInformation paymentInformation = new PaymentInformation("826786839822809", "02/2022", "762");
 
         Order order = new Order(consumerId, restaurantId, orderLineItems, deliveryInformation, paymentInformation);
         orderService.createOrder(order);
-
-        transaction.commit();
 
 
         List<Order> orders = orderService.fetchConsumerOrders(consumerId);
@@ -90,25 +40,6 @@ public class Main {
         }
 
     }
-
-    private static SessionFactory buildSessionFactory() {
-        Configuration configuration = new Configuration();
-        // Hibernate settings equivalent to hibernate.cfg.xml's properties
-        Properties settings = new Properties();
-        settings.put(Environment.DRIVER, "com.mysql.cj.jdbc.Driver");
-        settings.put(Environment.URL, "jdbc:mysql://localhost:3308/polyfood?zeroDateTimeBehavior=CONVERT_TO_NULL&serverTimezone=UTC");
-        settings.put(Environment.USER, "root");
-        settings.put(Environment.PASS, "rootpw");
-        settings.put(Environment.DIALECT, "org.hibernate.dialect.MySQL5Dialect");
-        settings.put(Environment.SHOW_SQL, "true");
-        //settings.put(Environment.CURRENT_SESSION_CONTEXT_CLASS, "thread");
-        // settings.put(Environment.HBM2DDL_AUTO, "create-drop");
-        configuration.setProperties(settings);
-        configuration.addAnnotatedClass(Order.class);
-        ServiceRegistry serviceRegistry = new StandardServiceRegistryBuilder()
-                .applySettings(configuration.getProperties()).build();
-        return configuration.buildSessionFactory(serviceRegistry);
-    }
-
 }
+
 
